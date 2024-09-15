@@ -1,0 +1,46 @@
+services:
+  apache:
+    image: httpd:latest
+    ports:
+      - "8080:8443"
+    volumes:
+      - ./apache-conf:/usr/local/apache2/conf:ro
+    depends_on:
+      - app
+
+  app:
+    build: .
+    ports:
+      - "8443:8443"
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=8443
+      - SERVER_SSL_KEY_STORE=file:/usr/app/keystore.p12
+      - SERVER_SSL_KEY_STORE_PASSWORD=478p2279
+      - SERVER_SSL_KEY_STORE_TYPE=PKCS12
+      - SERVER_SSL_KEY_ALIAS=tomcat
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: connectcity
+      MYSQL_USER: nevuos
+      MYSQL_PASSWORD: 478p2279
+      MYSQL_ROOT_PASSWORD: 478p2279P!
+    volumes:
+      - db-data:/var/lib/mysql
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  db-data:
+  redis-data:
