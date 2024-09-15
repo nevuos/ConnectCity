@@ -53,20 +53,22 @@ class CitizenService(
     }
 
     private fun validateCitizenData(cpf: String?, phoneNumber: String?, user: User) {
+        val validationErrors = mutableListOf<String>()
         cpf?.let {
             citizenRepository.findByCpf(it)?.let {
-                throw InvalidRequestError(CitizenMessages.CPF_ALREADY_EXISTS)
+                validationErrors.add(CitizenMessages.CPF_ALREADY_EXISTS)
             }
         }
-
         phoneNumber?.let {
             citizenRepository.findByPhoneNumber(it)?.let {
-                throw InvalidRequestError(CitizenMessages.PHONE_NUMBER_ALREADY_EXISTS)
+                validationErrors.add(CitizenMessages.PHONE_NUMBER_ALREADY_EXISTS)
             }
         }
-
         citizenRepository.findByUser(user)?.let {
-            throw InvalidRequestError(CitizenMessages.USER_ALREADY_ASSOCIATED)
+            validationErrors.add(CitizenMessages.USER_ALREADY_ASSOCIATED)
+        }
+        if (validationErrors.isNotEmpty()) {
+            throw InvalidRequestError(validationErrors.joinToString(", "))
         }
     }
 
@@ -76,7 +78,6 @@ class CitizenService(
 
         val citizen = citizenRepository.findByUser(user)
             ?: throw ResourceNotFoundError(CitizenMessages.CITIZEN_NOT_FOUND)
-
         return modelMapper.map(citizen, CitizenDetailsDTO::class.java)
     }
 
@@ -85,23 +86,24 @@ class CitizenService(
         val user = tokenService.getUserFromRequest(request)
         val citizen = citizenRepository.findByUser(user)
             ?: throw ResourceNotFoundError(CitizenMessages.CITIZEN_NOT_FOUND)
-
+        val validationErrors = mutableListOf<String>()
         updateCitizenRequest.cpf?.let { cpf ->
             citizenRepository.findByCpf(cpf)?.let { existingCitizen ->
                 if (existingCitizen.id != citizen.id) {
-                    throw InvalidRequestError(CitizenMessages.CPF_ALREADY_EXISTS)
+                    validationErrors.add(CitizenMessages.CPF_ALREADY_EXISTS)
                 }
             }
         }
-
         updateCitizenRequest.phoneNumber?.let { phoneNumber ->
             citizenRepository.findByPhoneNumber(phoneNumber)?.let { existingCitizen ->
                 if (existingCitizen.id != citizen.id) {
-                    throw InvalidRequestError(CitizenMessages.PHONE_NUMBER_ALREADY_EXISTS)
+                    validationErrors.add(CitizenMessages.PHONE_NUMBER_ALREADY_EXISTS)
                 }
             }
         }
-
+        if (validationErrors.isNotEmpty()) {
+            throw InvalidRequestError(validationErrors.joinToString(", "))
+        }
         modelMapper.map(updateCitizenRequest, citizen)
         citizenRepository.save(citizen)
         return CitizenMessages.CITIZEN_UPDATED_SUCCESSFULLY

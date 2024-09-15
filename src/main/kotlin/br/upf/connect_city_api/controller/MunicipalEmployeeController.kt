@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/employees")
 class MunicipalEmployeeController(
     private val municipalEmployeeService: MunicipalEmployeeService,
 ) {
@@ -28,6 +28,13 @@ class MunicipalEmployeeController(
     ): ResponseEntity<ApiResponseDTO> {
         val message = municipalEmployeeService.create(request, createRequest)
         return ResponseEntity.ok(ApiResponseDTO(message))
+    }
+
+    @UserTypeRequired(UserType.MUNICIPAL_EMPLOYEE)
+    @GetMapping("/me")
+    fun getDetails(request: HttpServletRequest): ResponseEntity<MunicipalEmployeeDetailsDTO> {
+        val employeeDetails = municipalEmployeeService.getDetails(request)
+        return ResponseEntity.ok(employeeDetails)
     }
 
     @UserTypeRequired(UserType.MUNICIPAL_EMPLOYEE)
@@ -63,12 +70,5 @@ class MunicipalEmployeeController(
         val employeeDetailsPage =
             municipalEmployeeService.search(firstName, lastName, cpf, jobTitle, department, pageable)
         return ResponseEntity.ok(employeeDetailsPage)
-    }
-
-    @UserTypeRequired(UserType.MUNICIPAL_EMPLOYEE)
-    @GetMapping("/me")
-    fun getDetails(request: HttpServletRequest): ResponseEntity<MunicipalEmployeeDetailsDTO> {
-        val employeeDetails = municipalEmployeeService.getDetails(request)
-        return ResponseEntity.ok(employeeDetails)
     }
 }

@@ -19,7 +19,7 @@ class FirewallConfig {
     companion object {
         private val HEADER_NAME_REGEX = "^[a-zA-Z0-9-]+$".toRegex()
         private val PARAM_NAME_REGEX = "^[a-zA-Z0-9_]+$".toRegex()
-        private val PARAM_VALUE_REGEX = "^[a-zA-Z0-9,;\\s@.:-]+$".toRegex()
+        private val PARAM_VALUE_REGEX = "^[\\p{L}0-9,;\\s@.:-]+$".toRegex()
         private const val SCRIPT_TAG = "<script>"
     }
 

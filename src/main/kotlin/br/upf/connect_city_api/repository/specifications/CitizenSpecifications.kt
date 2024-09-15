@@ -49,8 +49,18 @@ object CitizenSpecifications {
     fun phoneNumberContains(phoneNumber: String?): Specification<Citizen>? {
         return phoneNumber?.let {
             Specification { root, _, cb ->
-                cb.like(cb.lower(root.get("phoneNumber")), "%${it.lowercase()}%")
+                val phoneNumberWithoutSpaces = cb.function(
+                    "replace", String::class.java,
+                    root.get<String>("phoneNumber"), cb.literal(" "), cb.literal("")
+                )
+                val phoneNumberWithoutHyphens = cb.function(
+                    "replace", String::class.java,
+                    phoneNumberWithoutSpaces, cb.literal("-"), cb.literal("")
+                )
+                val sanitizedPhoneNumber = it.replace(Regex("[\\s-]"), "")
+                cb.like(phoneNumberWithoutHyphens, "%$sanitizedPhoneNumber%")
             }
         }
     }
+
 }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
 @RestController
-@RequestMapping("/citizen")
+@RequestMapping("/citizens")
 class CitizenController(
     private val citizenService: CitizenService,
 ) {
