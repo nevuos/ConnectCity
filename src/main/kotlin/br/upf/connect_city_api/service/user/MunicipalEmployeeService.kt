@@ -3,9 +3,9 @@ package br.upf.connect_city_api.service.user
 import br.upf.connect_city_api.dtos.employee.CreateMunicipalEmployeeRequestDTO
 import br.upf.connect_city_api.dtos.employee.MunicipalEmployeeDetailsDTO
 import br.upf.connect_city_api.dtos.employee.UpdateMunicipalEmployeeRequestDTO
+import br.upf.connect_city_api.model.entity.enums.EmployeeType
 import br.upf.connect_city_api.model.entity.enums.UserType
 import br.upf.connect_city_api.model.entity.user.MunicipalEmployee
-import br.upf.connect_city_api.model.entity.user.User
 import br.upf.connect_city_api.repository.AdminRepository
 import br.upf.connect_city_api.repository.MunicipalEmployeeRepository
 import br.upf.connect_city_api.repository.specifications.MunicipalEmployeeSpecifications
@@ -28,6 +28,7 @@ class MunicipalEmployeeService(
     private val adminRepository: AdminRepository,
     private val userManagementService: UserManagementService,
     private val tokenService: TokenService,
+    private val profileValidationService: ProfileValidationService,
     private val modelMapper: ModelMapper
 ) {
 
@@ -39,10 +40,22 @@ class MunicipalEmployeeService(
     fun create(request: HttpServletRequest, createMunicipalEmployeeRequest: CreateMunicipalEmployeeRequestDTO): String {
         val user = tokenService.getUserFromRequest(request)
 
-        validateMunicipalEmployeeData(createMunicipalEmployeeRequest.cpf, user)
+        profileValidationService.validateProfileData(
+            createMunicipalEmployeeRequest.cpf,
+            createMunicipalEmployeeRequest.phoneNumber,
+            user
+        )
+
+        val employeeType = createMunicipalEmployeeRequest.employeeType?.uppercase() ?: "INTERNAL"
+        val employeeTypeEnum = try {
+            EmployeeType.valueOf(employeeType)
+        } catch (e: IllegalArgumentException) {
+            throw InvalidRequestError(MunicipalEmployeeMessages.INVALID_EMPLOYEE_TYPE)
+        }
 
         val municipalEmployee = modelMapper.map(createMunicipalEmployeeRequest, MunicipalEmployee::class.java).apply {
             this.user = user
+            this.employeeType = employeeTypeEnum
         }
 
         municipalEmployeeRepository.save(municipalEmployee)
@@ -55,16 +68,6 @@ class MunicipalEmployeeService(
         }
 
         return MunicipalEmployeeMessages.EMPLOYEE_CREATED_SUCCESSFULLY
-    }
-
-    private fun validateMunicipalEmployeeData(cpf: String, user: User) {
-        if (municipalEmployeeRepository.findByCpf(cpf) != null) {
-            throw InvalidRequestError(MunicipalEmployeeMessages.CPF_ALREADY_EXISTS)
-        }
-
-        if (municipalEmployeeRepository.findByUser(user) != null) {
-            throw InvalidRequestError(MunicipalEmployeeMessages.USER_ALREADY_ASSOCIATED)
-        }
     }
 
     @Cacheable(
@@ -91,6 +94,12 @@ class MunicipalEmployeeService(
 
         val municipalEmployee = municipalEmployeeRepository.findByUser(user)
             ?: throw ResourceNotFoundError(MunicipalEmployeeMessages.EMPLOYEE_NOT_FOUND)
+
+        profileValidationService.validateProfileData(
+            updateMunicipalEmployeeRequest.cpf,
+            updateMunicipalEmployeeRequest.phoneNumber,
+            user
+        )
 
         modelMapper.map(updateMunicipalEmployeeRequest, municipalEmployee)
         municipalEmployeeRepository.save(municipalEmployee)

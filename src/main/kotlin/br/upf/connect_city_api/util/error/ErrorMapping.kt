@@ -18,7 +18,6 @@ object ErrorMapping {
         EmailAlreadyConfirmedError::class.java to EmailErrorMapping.EMAIL_ALREADY_CONFIRMED_ERROR_INFO,
         EmailSendError::class.java to EmailErrorMapping.EMAIL_SEND_ERROR_INFO,
         InvalidRequestError::class.java to RequestErrorMapping.INVALID_REQUEST_ERROR_INFO,
-        InvalidUserTypeError::class.java to RequestErrorMapping.INVALID_REQUEST_ERROR_INFO,
         NoAuthorizationError::class.java to RequestErrorMapping.NO_AUTHORIZATION_ERROR_INFO,
         PermissionDeniedError::class.java to RequestErrorMapping.PERMISSION_DENIED_ERROR_INFO,
         ResourceNotFoundError::class.java to RequestErrorMapping.RESOURCE_NOT_FOUND_ERROR_INFO,

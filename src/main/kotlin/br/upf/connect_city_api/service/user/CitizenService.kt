@@ -5,12 +5,10 @@ import br.upf.connect_city_api.dtos.citizen.CreateCitizenRequestDTO
 import br.upf.connect_city_api.dtos.citizen.UpdateCitizenRequestDTO
 import br.upf.connect_city_api.model.entity.enums.UserType
 import br.upf.connect_city_api.model.entity.user.Citizen
-import br.upf.connect_city_api.model.entity.user.User
 import br.upf.connect_city_api.repository.CitizenRepository
 import br.upf.connect_city_api.repository.specifications.CitizenSpecifications
 import br.upf.connect_city_api.service.auth.TokenService
 import br.upf.connect_city_api.util.constants.citizen.CitizenMessages
-import br.upf.connect_city_api.util.exception.InvalidRequestError
 import br.upf.connect_city_api.util.exception.ResourceNotFoundError
 import jakarta.servlet.http.HttpServletRequest
 import org.modelmapper.ModelMapper
@@ -26,6 +24,7 @@ import java.time.LocalDate
 class CitizenService(
     private val citizenRepository: CitizenRepository,
     private val userManagementService: UserManagementService,
+    private val profileValidationService: ProfileValidationService,
     private val tokenService: TokenService,
     private val modelMapper: ModelMapper
 ) {
@@ -34,7 +33,7 @@ class CitizenService(
     fun create(request: HttpServletRequest, createCitizenRequest: CreateCitizenRequestDTO): String {
         val user = tokenService.getUserFromRequest(request)
 
-        validateCitizenData(createCitizenRequest.cpf, createCitizenRequest.phoneNumber, user)
+        profileValidationService.validateProfileData(createCitizenRequest.cpf, createCitizenRequest.phoneNumber, user)
 
         val citizen = modelMapper.map(createCitizenRequest, Citizen::class.java).apply {
             this.user = user
@@ -52,26 +51,6 @@ class CitizenService(
         return CitizenMessages.CITIZEN_CREATED_SUCCESSFULLY
     }
 
-    private fun validateCitizenData(cpf: String?, phoneNumber: String?, user: User) {
-        val validationErrors = mutableListOf<String>()
-        cpf?.let {
-            citizenRepository.findByCpf(it)?.let {
-                validationErrors.add(CitizenMessages.CPF_ALREADY_EXISTS)
-            }
-        }
-        phoneNumber?.let {
-            citizenRepository.findByPhoneNumber(it)?.let {
-                validationErrors.add(CitizenMessages.PHONE_NUMBER_ALREADY_EXISTS)
-            }
-        }
-        citizenRepository.findByUser(user)?.let {
-            validationErrors.add(CitizenMessages.USER_ALREADY_ASSOCIATED)
-        }
-        if (validationErrors.isNotEmpty()) {
-            throw InvalidRequestError(validationErrors.joinToString(", "))
-        }
-    }
-
     @Cacheable(value = ["citizenById"], key = "#request.getUserPrincipal().name", cacheManager = "searchCacheManager")
     fun getDetails(request: HttpServletRequest): CitizenDetailsDTO {
         val user = tokenService.getUserFromRequest(request)
@@ -86,24 +65,14 @@ class CitizenService(
         val user = tokenService.getUserFromRequest(request)
         val citizen = citizenRepository.findByUser(user)
             ?: throw ResourceNotFoundError(CitizenMessages.CITIZEN_NOT_FOUND)
-        val validationErrors = mutableListOf<String>()
-        updateCitizenRequest.cpf?.let { cpf ->
-            citizenRepository.findByCpf(cpf)?.let { existingCitizen ->
-                if (existingCitizen.id != citizen.id) {
-                    validationErrors.add(CitizenMessages.CPF_ALREADY_EXISTS)
-                }
-            }
-        }
-        updateCitizenRequest.phoneNumber?.let { phoneNumber ->
-            citizenRepository.findByPhoneNumber(phoneNumber)?.let { existingCitizen ->
-                if (existingCitizen.id != citizen.id) {
-                    validationErrors.add(CitizenMessages.PHONE_NUMBER_ALREADY_EXISTS)
-                }
-            }
-        }
-        if (validationErrors.isNotEmpty()) {
-            throw InvalidRequestError(validationErrors.joinToString(", "))
-        }
+
+        profileValidationService.validateProfileData(
+            updateCitizenRequest.cpf,
+            updateCitizenRequest.phoneNumber,
+            user,
+            citizen.id
+        )
+
         modelMapper.map(updateCitizenRequest, citizen)
         citizenRepository.save(citizen)
         return CitizenMessages.CITIZEN_UPDATED_SUCCESSFULLY

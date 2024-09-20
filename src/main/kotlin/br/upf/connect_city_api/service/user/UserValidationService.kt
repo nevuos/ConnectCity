@@ -41,8 +41,4 @@ class UserValidationService(
     fun encodePassword(password: String): String {
         return passwordEncoder.encode(password)
     }
-
-    fun validatePasswordMatches(encodedPassword: String, rawPassword: String): Boolean {
-        return passwordEncoder.matches(rawPassword, encodedPassword)
-    }
 }

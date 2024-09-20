@@ -59,27 +59,30 @@ class GlobalExceptionHandler {
     private fun buildErrorDetails(
         fieldOrder: List<String>,
         sortedFieldErrorsMap: Map<String, List<FieldError>>
-    ): List<String?> {
+    ): List<String> {
         val orderedErrors: List<String> = fieldOrder.mapNotNull { field ->
             sortedFieldErrorsMap[field]?.let { errors ->
                 String.format(
                     GlobalExceptionHandlerConstants.FIELD_ERROR_FORMAT,
                     field,
-                    errors.joinToString(GlobalExceptionHandlerConstants.ERROR_JOIN_DELIMITER) {
-                        it.defaultMessage ?: GlobalExceptionHandlerConstants.UNKNOWN_ERROR
-                    })
+                    errors.joinToString(GlobalExceptionHandlerConstants.ERROR_JOIN_DELIMITER) { error ->
+                        val message = error.defaultMessage ?: GlobalExceptionHandlerConstants.UNKNOWN_ERROR
+                        if (message.endsWith(GlobalExceptionHandlerConstants.POINT_END)) message else message
+                    }.replace(GlobalExceptionHandlerConstants.ERROR_POINT_FIX, GlobalExceptionHandlerConstants.ERROR_JOIN_WITH_SPACE)
+                ).replace(GlobalExceptionHandlerConstants.DOUBLE_SPACE, GlobalExceptionHandlerConstants.SINGLE_SPACE).trim()
             }
         }
-        val remainingErrors = sortedFieldErrorsMap.keys
+        val remainingErrors: List<String> = sortedFieldErrorsMap.keys
             .filterNot { fieldOrder.contains(it) }
-            .map { field ->
+            .mapNotNull { field ->
                 sortedFieldErrorsMap[field]?.let { errors ->
                     String.format(
                         GlobalExceptionHandlerConstants.FIELD_ERROR_FORMAT,
                         field,
                         errors.joinToString(GlobalExceptionHandlerConstants.ERROR_JOIN_DELIMITER) {
                             it.defaultMessage ?: GlobalExceptionHandlerConstants.UNKNOWN_ERROR
-                        })
+                        }
+                    ).replace(GlobalExceptionHandlerConstants.DOUBLE_SPACE, GlobalExceptionHandlerConstants.SINGLE_SPACE).trim()
                 }
             }
         return orderedErrors + remainingErrors

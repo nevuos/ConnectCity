@@ -3,6 +3,7 @@ package br.upf.connect_city_api.model.entity.user
 import br.upf.connect_city_api.model.entity.call.TimeLog
 import br.upf.connect_city_api.model.entity.enums.EmployeeType
 import jakarta.persistence.*
+import java.time.LocalDate
 
 
 @Entity
@@ -25,8 +26,14 @@ class MunicipalEmployee(
     @Column(nullable = false, unique = true)
     var cpf: String,
 
-    @Column(name = "phone_number", nullable = false)
-    var phoneNumber: String,
+    @Column(nullable = true)
+    var dateOfBirth: LocalDate? = null,
+
+    @Column(nullable = true)
+    var gender: String? = null,
+
+    @Column(nullable = true)
+    var phoneNumber: String? = null,
 
     @Column(nullable = false)
     var jobTitle: String,
