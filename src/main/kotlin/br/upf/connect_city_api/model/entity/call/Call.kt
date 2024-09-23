@@ -1,6 +1,6 @@
 package br.upf.connect_city_api.model.entity.call
 
-import br.upf.connect_city_api.dtos.address.AddressDTO
+import br.upf.connect_city_api.model.entity.address.Address
 import br.upf.connect_city_api.model.entity.enums.CallStatus
 import br.upf.connect_city_api.model.entity.enums.PriorityLevel
 import br.upf.connect_city_api.model.entity.user.Citizen
@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "calls")
 class Call(
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
@@ -24,7 +25,7 @@ class Call(
     var employee: MunicipalEmployee? = null,
 
     @Embedded
-    var address: AddressDTO,
+    var address: Address,
 
     @Column(nullable = false)
     var subject: String,
@@ -35,6 +36,8 @@ class Call(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var status: CallStatus = CallStatus.OPEN,
+
+    var phoneNumber: String? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -51,7 +54,7 @@ class Call(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to_id", nullable = true)
-    var assignedTo: MunicipalEmployee? = null,  // Funcionário municipal responsável pelo chamado
+    var assignedTo: MunicipalEmployee? = null,
 
     @OneToMany(mappedBy = "call", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var steps: MutableList<Step> = mutableListOf(),
@@ -61,8 +64,7 @@ class Call(
     @Column(name = "tag")
     var tags: MutableList<String> = mutableListOf(),
 
-    @ElementCollection
-    @CollectionTable(name = "call_interactions", joinColumns = [JoinColumn(name = "call_id")])
+    @OneToMany(mappedBy = "call", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var interactionHistory: MutableList<Interaction> = mutableListOf(),
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -73,12 +75,10 @@ class Call(
     )
     var categories: MutableList<Category> = mutableListOf(),
 
-    @ElementCollection
-    @CollectionTable(name = "call_attachments", joinColumns = [JoinColumn(name = "call_id")])
+    @OneToMany(mappedBy = "call", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var attachments: MutableList<Attachment> = mutableListOf(),
 
-    @ElementCollection
-    @CollectionTable(name = "status_history", joinColumns = [JoinColumn(name = "call_id")])
+    @OneToMany(mappedBy = "call", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var statusHistory: MutableList<StatusChange> = mutableListOf(),
 
     @Column(nullable = false)
@@ -95,7 +95,7 @@ class Call(
     var visibleToGroups: MutableList<String> = mutableListOf(),
 
     @Column(nullable = true)
-    var progressPercentage: Int = 0,
+    var progressPercentage: Int? = null,
 
     @Column(nullable = true, length = 1000)
     var progressNotes: String? = null,
@@ -137,7 +137,6 @@ class Call(
     )
     var successorCalls: MutableList<Call> = mutableListOf(),
 
-    @ElementCollection
-    @CollectionTable(name = "notification_history", joinColumns = [JoinColumn(name = "call_id")])
+    @OneToMany(mappedBy = "call", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var notificationHistory: MutableList<Notification> = mutableListOf()
 )

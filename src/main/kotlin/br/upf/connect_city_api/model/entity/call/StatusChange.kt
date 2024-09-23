@@ -1,12 +1,27 @@
 package br.upf.connect_city_api.model.entity.call
 
 import br.upf.connect_city_api.model.entity.enums.CallStatus
-import jakarta.persistence.Embeddable
+import jakarta.persistence.*
 import java.time.LocalDateTime
 
-@Embeddable
+@Entity
+@Table(name = "status_changes")
 class StatusChange(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     var status: CallStatus,
+
+    @Column(nullable = false)
     var changedAt: LocalDateTime = LocalDateTime.now(),
-    var changedBy: String
+
+    @Column(nullable = false)
+    var changedBy: String,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "call_id", nullable = false)
+    var call: Call
 )

@@ -4,11 +4,10 @@ import br.upf.connect_city_api.util.constants.error.ErrorMappingConstants
 import br.upf.connect_city_api.util.constants.error.ErrorStatusConstants
 import br.upf.connect_city_api.util.error.ErrorMapping
 
-
-object EmailErrorMapping {
-    val EMAIL_SEND_ERROR_INFO = ErrorMapping.ErrorInfo(
-        ErrorMappingConstants.EMAIL_SEND_ERROR_CODE,
-        ErrorMappingConstants.EMAIL_SEND_ERROR_MESSAGE,
-        ErrorStatusConstants.EMAIL_SEND_ERROR_STATUS
+object StorageErrorMapping {
+    val STORAGE_ERROR_INFO = ErrorMapping.ErrorInfo(
+        ErrorMappingConstants.STORAGE_ERROR_CODE,
+        ErrorMappingConstants.STORAGE_ERROR_MESSAGE,
+        ErrorStatusConstants.STORAGE_ERROR_STATUS
     )
 }

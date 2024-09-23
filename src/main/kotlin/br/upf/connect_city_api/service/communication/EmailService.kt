@@ -33,12 +33,10 @@ class EmailService(
     @Async
     fun send(to: String, subject: String, confirmationUrl: String, templateId: String): CompletableFuture<String> {
         validateParameters(to, subject, confirmationUrl, templateId)
+        val mail = createMail(to, subject, confirmationUrl, templateId)
+        val sendGrid = SendGrid(apiKey)
 
-        return CompletableFuture.supplyAsync {
-            val mail = createMail(to, subject, confirmationUrl, templateId)
-            val sendGrid = SendGrid(apiKey)
-            sendWithRetry(sendGrid, mail)
-        }
+        return sendWithRetry(sendGrid, mail, 0, INITIAL_RETRY_DELAY_SECONDS)
     }
 
     private fun validateParameters(to: String, subject: String, confirmationUrl: String, templateId: String) {
@@ -63,27 +61,31 @@ class EmailService(
         }
     }
 
-    private fun sendWithRetry(sendGrid: SendGrid, mail: Mail): String {
-        var retryDelay = INITIAL_RETRY_DELAY_SECONDS
-
-        repeat(MAX_RETRIES) { attempt ->
+    private fun sendWithRetry(
+        sendGrid: SendGrid,
+        mail: Mail,
+        attempt: Int,
+        delay: Long
+    ): CompletableFuture<String> {
+        return CompletableFuture.supplyAsync {
             try {
                 val response = sendGrid.api(createRequest(mail))
                 if (response.statusCode == 202) {
-                    return SUCCESS_MESSAGE
+                    SUCCESS_MESSAGE
                 } else {
                     throw EmailSendError("$ERROR_PREFIX: ${response.statusCode}")
                 }
             } catch (e: IOException) {
                 if (attempt < MAX_RETRIES - 1) {
-                    TimeUnit.SECONDS.sleep(retryDelay)
-                    retryDelay *= 2
-                } else {
+                    CompletableFuture.delayedExecutor(delay, TimeUnit.SECONDS).execute {
+                        sendWithRetry(sendGrid, mail, attempt + 1, delay * 2).get()
+                    }
                     throw EmailSendError("$ERROR_PREFIX: ${e.message}")
+                } else {
+                    throw EmailSendError("$ERROR_PREFIX: $RETRIES_EXCEEDED")
                 }
             }
         }
-        throw EmailSendError(RETRIES_EXCEEDED)
     }
 
     private fun createRequest(mail: Mail): Request {

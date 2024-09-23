@@ -15,8 +15,8 @@ object ErrorMapping {
 
     private val exceptionToErrorInfoMap: Map<Class<out Throwable>, ErrorInfo> = mapOf(
         AuthenticationError::class.java to AuthenticationErrorMapping.ERROR_INFO,
-        EmailAlreadyConfirmedError::class.java to EmailErrorMapping.EMAIL_ALREADY_CONFIRMED_ERROR_INFO,
         EmailSendError::class.java to EmailErrorMapping.EMAIL_SEND_ERROR_INFO,
+        StorageException::class.java to StorageErrorMapping.STORAGE_ERROR_INFO,
         InvalidRequestError::class.java to RequestErrorMapping.INVALID_REQUEST_ERROR_INFO,
         NoAuthorizationError::class.java to RequestErrorMapping.NO_AUTHORIZATION_ERROR_INFO,
         PermissionDeniedError::class.java to RequestErrorMapping.PERMISSION_DENIED_ERROR_INFO,

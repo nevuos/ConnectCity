@@ -36,11 +36,9 @@ class Step(
     @Column(nullable = true, length = 1000)
     var notes: String? = null,
 
-    @ElementCollection
-    @CollectionTable(name = "step_attachments", joinColumns = [JoinColumn(name = "step_id")])
+    @OneToMany(mappedBy = "step", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var attachments: MutableList<Attachment> = mutableListOf(),
 
-    @ElementCollection
-    @CollectionTable(name = "time_logs", joinColumns = [JoinColumn(name = "step_id")])
+    @OneToMany(mappedBy = "step", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var timeLogs: MutableList<TimeLog> = mutableListOf()
 )

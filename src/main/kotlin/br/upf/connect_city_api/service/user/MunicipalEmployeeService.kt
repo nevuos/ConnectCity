@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class MunicipalEmployeeService(
@@ -32,6 +33,7 @@ class MunicipalEmployeeService(
     private val modelMapper: ModelMapper
 ) {
 
+    @Transactional
     @CacheEvict(
         value = ["municipalEmployeeById"],
         key = "#request.getUserPrincipal().name",
@@ -84,6 +86,7 @@ class MunicipalEmployeeService(
         return modelMapper.map(municipalEmployee, MunicipalEmployeeDetailsDTO::class.java)
     }
 
+    @Transactional
     @CacheEvict(
         value = ["municipalEmployeeById"],
         key = "#request.getUserPrincipal().name",
@@ -98,7 +101,8 @@ class MunicipalEmployeeService(
         profileValidationService.validateProfileData(
             updateMunicipalEmployeeRequest.cpf,
             updateMunicipalEmployeeRequest.phoneNumber,
-            user
+            user,
+            municipalEmployee.id
         )
 
         modelMapper.map(updateMunicipalEmployeeRequest, municipalEmployee)
@@ -107,6 +111,7 @@ class MunicipalEmployeeService(
         return MunicipalEmployeeMessages.EMPLOYEE_UPDATED_SUCCESSFULLY
     }
 
+    @Transactional
     @CacheEvict(value = ["municipalEmployeeById"], key = "#municipalEmployeeId", cacheManager = "searchCacheManager")
     fun approve(municipalEmployeeId: Long, request: HttpServletRequest): String {
         val user = tokenService.getUserFromRequest(request)

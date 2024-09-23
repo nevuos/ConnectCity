@@ -38,7 +38,7 @@ class MunicipalEmployeeController(
     }
 
     @UserTypeRequired(UserType.MUNICIPAL_EMPLOYEE)
-    @PutMapping
+    @PatchMapping
     fun update(
         @Valid @RequestBody updateRequest: UpdateMunicipalEmployeeRequestDTO,
         request: HttpServletRequest

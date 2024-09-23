@@ -3,6 +3,7 @@ package br.upf.connect_city_api.dtos.employee
 import br.upf.connect_city_api.util.validation.ValidCPF
 import br.upf.connect_city_api.util.validation.ValidPhoneNumber
 import jakarta.validation.constraints.Size
+import java.time.LocalDate
 
 data class UpdateMunicipalEmployeeRequestDTO(
     @field:Size(min = 2, max = 50, message = "O primeiro nome deve ter entre 2 e 50 caracteres.")
@@ -15,13 +16,19 @@ data class UpdateMunicipalEmployeeRequestDTO(
     @field:ValidCPF
     val cpf: String? = null,
 
-    @field:Size(min = 10, max = 15, message = "O número de telefone deve ter entre 10 e 15 caracteres.")
+    val dateOfBirth: LocalDate? = null,
+
+    @field:Size(min = 1, max = 10, message = "O gênero deve ter entre 1 e 10 caracteres.")
+    val gender: String?,
+
     @field:ValidPhoneNumber
     val phoneNumber: String? = null,
 
-    @field:Size(min = 2, max = 100, message = "O cargo deve ter entre 2 e 100 caracteres.")
+    @field:Size(min = 2, max = 50, message = "O cargo deve ter entre 2 e 50 caracteres.")
     val jobTitle: String? = null,
 
-    @field:Size(min = 2, max = 100, message = "O departamento deve ter entre 2 e 100 caracteres.")
-    val department: String? = null
+    @field:Size(min = 2, max = 50, message = "O departamento deve ter entre 2 e 50 caracteres.")
+    val department: String? = null,
+
+    val employeeType: String? = "INTERNAL"
 )

@@ -7,6 +7,7 @@ import br.upf.connect_city_api.util.constants.user.UserMessages
 import br.upf.connect_city_api.util.exception.InvalidRequestError
 import br.upf.connect_city_api.util.exception.ResourceNotFoundError
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserAuthenticationService(
@@ -14,6 +15,7 @@ class UserAuthenticationService(
     private val userValidationService: UserValidationService
 ) {
 
+    @Transactional
     fun register(username: String, password: String, email: String, userType: UserType = UserType.TEMPORARY) {
         userValidationService.validateUserDetails(username, email)
         val encodedPassword = userValidationService.encodePassword(password)
@@ -26,6 +28,7 @@ class UserAuthenticationService(
         userRepository.save(newUser)
     }
 
+    @Transactional
     fun updatePassword(id: Long, newPassword: String) {
         val user = findById(id)
         user.password = userValidationService.encodePassword(newPassword)
@@ -37,6 +40,7 @@ class UserAuthenticationService(
             ?: throw ResourceNotFoundError(UserMessages.USER_NOT_FOUND)
     }
 
+    @Transactional
     fun confirmEmail(email: String, emailConfirmed: Boolean) {
         val user = findByEmail(email)
         if (user.emailConfirmed && emailConfirmed) {

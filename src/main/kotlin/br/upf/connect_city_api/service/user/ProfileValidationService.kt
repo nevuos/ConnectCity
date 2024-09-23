@@ -15,36 +15,45 @@ class ProfileValidationService(
 
     fun validateProfileData(cpf: String?, phoneNumber: String?, user: User, existingProfileId: Long? = null) {
         val validationErrors = mutableListOf<String>()
-
-        cpf?.takeIf { isCpfTaken(it, existingProfileId) }?.let {
-            validationErrors.add(ProfileMessages.CPF_ALREADY_EXISTS)
+        cpf?.let {
+            if (isCpfTaken(it, existingProfileId)) {
+                validationErrors.add(ProfileMessages.CPF_ALREADY_EXISTS)
+            }
         }
-
-        phoneNumber?.takeIf { isPhoneNumberTaken(it, existingProfileId) }?.let {
-            validationErrors.add(ProfileMessages.PHONE_NUMBER_ALREADY_EXISTS)
+        phoneNumber?.let {
+            if (isPhoneNumberTaken(it, existingProfileId)) {
+                validationErrors.add(ProfileMessages.PHONE_NUMBER_ALREADY_EXISTS)
+            }
         }
-
         if (isUserAssociated(user, existingProfileId)) {
             validationErrors.add(ProfileMessages.USER_ALREADY_ASSOCIATED)
         }
-
-        validationErrors.takeIf { it.isNotEmpty() }?.let {
-            throw InvalidRequestError(it.joinToString(""))
+        if (validationErrors.isNotEmpty()) {
+            throw InvalidRequestError(validationErrors.joinToString(" "))
         }
     }
 
     private fun isCpfTaken(cpf: String, existingProfileId: Long?): Boolean {
-        return (citizenRepository.findByCpf(cpf)?.id != existingProfileId)
-                || (municipalEmployeeRepository.findByCpf(cpf)?.id != existingProfileId)
+        val citizen = citizenRepository.findByCpf(cpf)
+        val employee = municipalEmployeeRepository.findByCpf(cpf)
+
+        return (citizen != null && citizen.id != existingProfileId) ||
+                (employee != null && employee.id != existingProfileId)
     }
 
     private fun isPhoneNumberTaken(phoneNumber: String, existingProfileId: Long?): Boolean {
-        return (citizenRepository.findByPhoneNumber(phoneNumber)?.id != existingProfileId)
-                || (municipalEmployeeRepository.findByPhoneNumber(phoneNumber)?.id != existingProfileId)
+        val citizen = citizenRepository.findByPhoneNumber(phoneNumber)
+        val employee = municipalEmployeeRepository.findByPhoneNumber(phoneNumber)
+
+        return (citizen != null && citizen.id != existingProfileId) ||
+                (employee != null && employee.id != existingProfileId)
     }
 
     private fun isUserAssociated(user: User, existingProfileId: Long?): Boolean {
-        return (citizenRepository.findByUser(user)?.id != existingProfileId)
-                || (municipalEmployeeRepository.findByUser(user)?.id != existingProfileId)
+        val citizen = citizenRepository.findByUser(user)
+        val employee = municipalEmployeeRepository.findByUser(user)
+
+        return (citizen != null && citizen.id != existingProfileId) ||
+                (employee != null && employee.id != existingProfileId)
     }
 }

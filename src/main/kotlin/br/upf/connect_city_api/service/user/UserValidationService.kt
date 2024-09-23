@@ -24,7 +24,7 @@ class UserValidationService(
         }
 
         if (errors.isNotEmpty()) {
-            throw InvalidRequestError(errors.joinToString(" e "))
+            throw InvalidRequestError(errors.joinToString(""))
         }
     }
 

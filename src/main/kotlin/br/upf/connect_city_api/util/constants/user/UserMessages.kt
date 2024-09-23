@@ -12,5 +12,6 @@ class UserMessages {
         const val INVALID_USER_TYPE = "Tipo de usuário inválido: %s."
         const val USER_ALREADY_ACTIVE = "O usuário já está ativo."
         const val USER_ALREADY_DISABLED = "O usuário já está desabilitado."
+        const val PROFILE_NOT_FOUND = "Perfil não encontrado para o usuário: "
     }
 }

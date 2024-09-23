@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
@@ -29,6 +30,7 @@ class CitizenService(
     private val modelMapper: ModelMapper
 ) {
 
+    @Transactional
     @CacheEvict(value = ["citizenById"], key = "#request.getUserPrincipal().name", cacheManager = "searchCacheManager")
     fun create(request: HttpServletRequest, createCitizenRequest: CreateCitizenRequestDTO): String {
         val user = tokenService.getUserFromRequest(request)
@@ -60,6 +62,7 @@ class CitizenService(
         return modelMapper.map(citizen, CitizenDetailsDTO::class.java)
     }
 
+    @Transactional
     @CacheEvict(value = ["citizenById"], key = "#request.getUserPrincipal().name", cacheManager = "searchCacheManager")
     fun update(request: HttpServletRequest, updateCitizenRequest: UpdateCitizenRequestDTO): String {
         val user = tokenService.getUserFromRequest(request)

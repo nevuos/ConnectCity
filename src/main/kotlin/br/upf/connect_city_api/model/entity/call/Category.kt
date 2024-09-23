@@ -16,6 +16,6 @@ class Category(
     @JoinColumn(name = "parent_category_id", nullable = true)
     var parentCategory: Category? = null,
 
-    @OneToMany(mappedBy = "parentCategory", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parentCategory", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
     var subcategories: MutableList<Category> = mutableListOf()
 )

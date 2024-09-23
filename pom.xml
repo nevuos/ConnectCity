@@ -86,6 +86,13 @@
             <version>3.1.0</version>
         </dependency>
 
+        <!-- Amazon S3 - Supabase Config -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.28.6</version>
+        </dependency>
+
         <!-- JSON and Mapping -->
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
