@@ -24,7 +24,7 @@ data class UpdateCallRequestDTO(
 
     val isPublic: Boolean? = null,
 
-    val estimatedCompletion: LocalDateTime? = null,
+    val estimatedCompletion: LocalDateTime? = null,z
 
     val progressPercentage: Int? = null,
 

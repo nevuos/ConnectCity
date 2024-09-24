@@ -14,4 +14,5 @@ object CallMessages {
     const val CALL_ASSIGNED_SUCCESSFULLY = "Chamado atribuído com sucesso."
     const val CATEGORY_ALREADY_EXISTS = "Categoria já existe."
     const val CATEGORY_CREATED_SUCCESS = "Categoria criada com sucesso."
+    const val INVALID_CATEGORY_IDS = "Os IDs de categoria fornecidos são inválidos. Por favor, verifique os IDs e tente novamente."
 }

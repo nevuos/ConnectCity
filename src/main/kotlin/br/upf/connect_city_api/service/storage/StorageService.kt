@@ -7,4 +7,5 @@ import java.util.concurrent.CompletableFuture
 interface StorageService {
     fun uploadFileAsync(file: MultipartFile): CompletableFuture<String>
     fun downloadFileAsync(url: String): CompletableFuture<File>
+    fun deleteFile(fileUrl: String): CompletableFuture<Void>
 }
