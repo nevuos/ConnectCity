@@ -8,7 +8,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Size
 import java.time.LocalDateTime
 
-data class UpdateCallRequestDTO(
+data class ManagerUpdateCallRequestDTO(
     var id: Long?,
 
     var assignedToId: Long?,

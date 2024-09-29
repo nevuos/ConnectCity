@@ -19,6 +19,10 @@ class TimeLog(
     @JoinColumn(name = "step_id", nullable = false)
     var step: Step,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "call_id", nullable = false)
+    var call: Call,
+
     @Column(nullable = false)
     var timeSpentMinutes: Int = 0,
 
