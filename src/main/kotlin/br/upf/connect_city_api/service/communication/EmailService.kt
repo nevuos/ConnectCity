@@ -22,30 +22,51 @@ class EmailService(
 ) {
 
     companion object {
-        private const val SUCCESS_MESSAGE = "E-mail enviado com sucesso."
-        private const val ERROR_PREFIX = "Falha ao enviar o e-mail"
-        private const val PARAMETERS_ERROR = "Parâmetros inválidos."
-        private const val RETRIES_EXCEEDED = "Falha ao enviar: Tentativas máximas alcançadas sem sucesso."
-        private const val MAX_RETRIES = 3
-        private const val INITIAL_RETRY_DELAY_SECONDS = 2L
+        const val SUCCESS_MESSAGE = "E-mail enviado com sucesso."
+        const val ERROR_PREFIX = "Falha ao enviar o e-mail"
+        const val PARAMETERS_ERROR = "Parâmetros inválidos."
+        const val RETRIES_EXCEEDED = "Falha ao enviar: Tentativas máximas alcançadas sem sucesso."
+        const val MAX_RETRIES = 3
+        const val INITIAL_RETRY_DELAY_SECONDS = 2L
+        const val SENDGRID_API_ENDPOINT = "mail/send"
+        const val STATUS_CODE_SUCCESS = 202
+        const val CONFIRMATION_URL_KEY = "confirmation_url"
     }
 
     @Async
-    fun send(to: String, subject: String, confirmationUrl: String, templateId: String): CompletableFuture<String> {
-        validateParameters(to, subject, confirmationUrl, templateId)
-        val mail = createMail(to, subject, confirmationUrl, templateId)
+    fun send(
+        to: String,
+        subject: String,
+        templateId: String,
+        dynamicData: Map<String, String> = emptyMap(),
+        confirmationUrl: String? = null
+    ): CompletableFuture<String> {
+        validateParameters(to, subject, templateId)
+
+        val finalDynamicData = if (confirmationUrl != null) {
+            dynamicData + (CONFIRMATION_URL_KEY to confirmationUrl)
+        } else {
+            dynamicData
+        }
+
+        val mail = createMailWithDynamicData(to, subject, finalDynamicData, templateId)
         val sendGrid = SendGrid(apiKey)
 
         return sendWithRetry(sendGrid, mail, 0, INITIAL_RETRY_DELAY_SECONDS)
     }
 
-    private fun validateParameters(to: String, subject: String, confirmationUrl: String, templateId: String) {
-        if (to.isBlank() || subject.isBlank() || confirmationUrl.isBlank() || templateId.isBlank()) {
+    private fun validateParameters(to: String, subject: String, templateId: String) {
+        if (to.isBlank() || subject.isBlank() || templateId.isBlank()) {
             throw InvalidRequestError(PARAMETERS_ERROR)
         }
     }
 
-    private fun createMail(to: String, subject: String, confirmationUrl: String, templateId: String): Mail {
+    private fun createMailWithDynamicData(
+        to: String,
+        subject: String,
+        dynamicData: Map<String, String>,
+        templateId: String
+    ): Mail {
         val from = Email(fromAddress)
         val toEmail = Email(to)
 
@@ -55,7 +76,9 @@ class EmailService(
             this.templateId = templateId
             val personalization = Personalization().apply {
                 addTo(toEmail)
-                addDynamicTemplateData("confirmation_url", confirmationUrl)
+                dynamicData.forEach { (key, value) ->
+                    addDynamicTemplateData(key, value)
+                }
             }
             addPersonalization(personalization)
         }
@@ -70,7 +93,7 @@ class EmailService(
         return CompletableFuture.supplyAsync {
             try {
                 val response = sendGrid.api(createRequest(mail))
-                if (response.statusCode == 202) {
+                if (response.statusCode == STATUS_CODE_SUCCESS) {
                     SUCCESS_MESSAGE
                 } else {
                     throw EmailSendError("$ERROR_PREFIX: ${response.statusCode}")
@@ -91,7 +114,7 @@ class EmailService(
     private fun createRequest(mail: Mail): Request {
         return Request().apply {
             method = Method.POST
-            endpoint = "mail/send"
+            endpoint = SENDGRID_API_ENDPOINT
             body = mail.build()
         }
     }

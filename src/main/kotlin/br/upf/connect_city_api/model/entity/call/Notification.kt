@@ -21,5 +21,7 @@ class Notification(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "call_id", nullable = false)
-    var call: Call
+    var call: Call,
+
+    var attemptCount: Int = 0
 )

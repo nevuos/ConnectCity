@@ -6,7 +6,7 @@ import br.upf.connect_city_api.repository.CategoryRepository
 import br.upf.connect_city_api.util.constants.call.CallMessages
 import br.upf.connect_city_api.util.exception.InvalidRequestError
 import br.upf.connect_city_api.util.exception.ResourceNotFoundError
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
 

@@ -5,6 +5,7 @@ import br.upf.connect_city_api.util.constants.user.UserMessages
 import br.upf.connect_city_api.util.exception.InvalidRequestError
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserValidationService(
@@ -12,6 +13,7 @@ class UserValidationService(
     private val passwordEncoder: PasswordEncoder
 ) {
 
+    @Transactional(readOnly = true)
     fun validateUserDetails(username: String, email: String, currentUserId: Long? = null) {
         val errors = mutableListOf<String>()
 
@@ -28,11 +30,13 @@ class UserValidationService(
         }
     }
 
+    @Transactional(readOnly = true)
     fun isUsernameTaken(username: String, currentUserId: Long?): Boolean {
         val existingUserByUsername = userRepository.findByUsername(username)
         return existingUserByUsername != null && existingUserByUsername.id != currentUserId
     }
 
+    @Transactional(readOnly = true)
     fun isEmailTaken(email: String, currentUserId: Long?): Boolean {
         val existingUserByEmail = userRepository.findByEmail(email)
         return existingUserByEmail != null && existingUserByEmail.id != currentUserId

@@ -10,5 +10,6 @@ import org.springframework.stereotype.Repository
 interface CitizenRepository : JpaRepository<Citizen, Long>, JpaSpecificationExecutor<Citizen> {
     fun findByCpf(cpf: String): Citizen?
     fun findByUser(user: User): Citizen?
+    fun findByUserId(userId: Long): Citizen?
     fun findByPhoneNumber(phoneNumber: String): Citizen?
 }

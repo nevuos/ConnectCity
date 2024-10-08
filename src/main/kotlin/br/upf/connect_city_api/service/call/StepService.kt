@@ -48,7 +48,7 @@ class StepService(
         }
 
         stepRepository.save(step)
-        attachmentService.processAttachments(step.attachments, attachments)
+        attachmentService.processAttachmentsForStep(step.id!!, attachments)
 
         timeLogService.logStepStart(step, assignedEmployee, call)
 
@@ -66,7 +66,7 @@ class StepService(
         val step = getStepByIdAndVerifyAssignedEmployee(stepId)
 
         modelMapper.map(updateStepRequestDTO, step)
-        attachmentService.processAttachments(step.attachments, attachments, removeAttachmentIds)
+        attachmentService.processAttachmentsForStep(stepId, attachments, removeAttachmentIds)
 
         stepRepository.save(step)
         logger.info("Step updated successfully with stepId: $stepId")

@@ -11,5 +11,6 @@ interface MunicipalEmployeeRepository : JpaRepository<MunicipalEmployee, Long>,
     JpaSpecificationExecutor<MunicipalEmployee> {
     fun findByCpf(cpf: String): MunicipalEmployee?
     fun findByUser(user: User): MunicipalEmployee?
+    fun findByUserId(userId: Long): MunicipalEmployee?
     fun findByPhoneNumber(phoneNumber: String): MunicipalEmployee?
 }

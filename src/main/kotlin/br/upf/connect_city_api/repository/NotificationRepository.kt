@@ -9,6 +9,8 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
 
     fun findByStatus(status: String): List<Notification>
 
+    fun findByCallIdAndNotificationType(callId: Long, notificationType: String): Notification?
+
     fun findByCallId(callId: Long): List<Notification>
 
     fun existsByCallIdAndStatus(callId: Long, status: String): Boolean

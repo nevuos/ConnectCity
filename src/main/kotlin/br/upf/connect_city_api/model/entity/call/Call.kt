@@ -46,7 +46,7 @@ class Call(
     @Column(nullable = false)
     var createdAt: LocalDateTime = LocalDateTime.now(),
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     var updatedAt: LocalDateTime? = null,
 
     @Column(nullable = true)

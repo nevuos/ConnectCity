@@ -17,8 +17,13 @@ class EmailController(private val emailService: EmailService) {
 
     @PostMapping("/send")
     fun send(@Valid @RequestBody requestDTO: EmailRequestDTO): CompletableFuture<ResponseEntity<ApiResponseDTO>> {
-        val message =
-            emailService.send(requestDTO.to, requestDTO.subject, requestDTO.confirmationUrl, requestDTO.templateId)
+        val message = emailService.send(
+            to = requestDTO.to,
+            subject = requestDTO.subject,
+            templateId = requestDTO.templateId,
+            dynamicData = requestDTO.dynamicData,
+            confirmationUrl = requestDTO.confirmationUrl
+        )
         return message.thenApply { msg -> ResponseEntity.ok(ApiResponseDTO(msg)) }
     }
 }

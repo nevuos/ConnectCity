@@ -72,6 +72,7 @@ class MunicipalEmployeeService(
         return MunicipalEmployeeMessages.EMPLOYEE_CREATED_SUCCESSFULLY
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(
         value = ["municipalEmployeeById"],
         key = "#request.getUserPrincipal().name",
@@ -133,6 +134,7 @@ class MunicipalEmployeeService(
         return MunicipalEmployeeMessages.EMPLOYEE_APPROVED_SUCCESSFULLY
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(
         value = ["searchMunicipalEmployees"],
         key = "{#firstName, #lastName, #cpf, #jobTitle, #department, #pageable}",

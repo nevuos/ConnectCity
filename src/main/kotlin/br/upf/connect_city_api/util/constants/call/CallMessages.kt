@@ -5,6 +5,7 @@ object CallMessages {
     // Mensagens de Sucesso
     const val CALL_CREATED_SUCCESSFULLY = "Chamado criado com sucesso."
     const val CALL_UPDATED_SUCCESSFULLY = "Chamado atualizado com sucesso."
+    const val CALL_ASSIGNED_SUCCESSFULLY = "Chamado atribuído com sucesso."
     const val CALL_COMPLETED_LOG = "Chamado concluído com sucesso."
     const val CALL_DELETED_SUCCESSFULLY = "Chamado excluído com sucesso."
 

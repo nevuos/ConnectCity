@@ -30,6 +30,7 @@ class UserManagementService(
     private val userValidationService: UserValidationService
 ) {
 
+    @Transactional(readOnly = true)
     @Cacheable(
         value = ["userDetails"],
         key = "#request.getHeader('Authorization')",
@@ -86,6 +87,7 @@ class UserManagementService(
         return determineUpdateMessage(isActive)
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(
         value = ["searchUsers"],
         key = "{#username, #email, #userType, #isActive, #createdAfter, #createdBefore, #createdOn, #pageable}",
@@ -106,6 +108,7 @@ class UserManagementService(
         return usersPage.map { user -> mapToUserDetailsDTO(user) }
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(value = ["userById"], key = "#userId", cacheManager = "searchCacheManager")
     internal fun findById(userId: Long): User {
         return userRepository.findById(userId).orElseThrow {
@@ -113,6 +116,7 @@ class UserManagementService(
         }
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(
         value = ["userFromToken"],
         key = "#request.getHeader('Authorization')",
@@ -123,10 +127,12 @@ class UserManagementService(
         return findById(userId)
     }
 
+    @Transactional
     private fun getUserForUpdate(id: Long?, request: HttpServletRequest?): User {
         return id?.let { findById(it) } ?: getUserFromRequest(request!!)
     }
 
+    @Transactional
     private fun updateUserDetails(
         user: User,
         updateRequest: UpdateUserRequestDTO?,
@@ -144,6 +150,7 @@ class UserManagementService(
         }
     }
 
+    @Transactional
     private fun processUpdateRequest(user: User, updateRequest: UpdateUserRequestDTO) {
         updateRequest.password?.let { password ->
             user.password = userValidationService.encodePassword(password)
@@ -156,11 +163,13 @@ class UserManagementService(
         modelMapper.map(updateRequest.copy(password = null), user)
     }
 
+    @Transactional
     private fun updateUserType(user: User, newType: String) {
         val userType = UserType.valueOf(newType.uppercase())
         user.userType = userType
     }
 
+    @Transactional
     private fun updateActiveStatus(user: User, isActive: Boolean) {
         user.isActive = isActive
     }
@@ -169,6 +178,7 @@ class UserManagementService(
         return if (isActive == false) UserMessages.USER_ACCOUNT_DISABLED_SUCCESSFULLY else UserMessages.USER_UPDATED_SUCCESSFULLY
     }
 
+    @Transactional(readOnly = true)
     private fun createUserSpecification(
         username: String?,
         email: String?,
@@ -193,10 +203,12 @@ class UserManagementService(
             .and(UserSpecifications.createdOn(createdOn))
     }
 
+    @Transactional(readOnly = true)
     private fun mapToUserDetailsDTO(user: User): UserDetailsDTO {
         return modelMapper.map(user, UserDetailsDTO::class.java)
     }
 
+    @Transactional
     private fun handleAccountDeactivation(response: HttpServletResponse) {
         tokenService.clearTokensFromResponse(response)
     }

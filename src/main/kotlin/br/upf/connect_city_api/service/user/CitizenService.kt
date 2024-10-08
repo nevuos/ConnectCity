@@ -53,6 +53,7 @@ class CitizenService(
         return CitizenMessages.CITIZEN_CREATED_SUCCESSFULLY
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(value = ["citizenById"], key = "#request.getUserPrincipal().name", cacheManager = "searchCacheManager")
     fun getDetails(request: HttpServletRequest): CitizenDetailsDTO {
         val user = tokenService.getUserFromRequest(request)
@@ -81,6 +82,7 @@ class CitizenService(
         return CitizenMessages.CITIZEN_UPDATED_SUCCESSFULLY
     }
 
+    @Transactional(readOnly = true)
     @Cacheable(
         value = ["searchCitizens"],
         key = "{#firstName, #lastName, #cpf, #dateOfBirth, #gender, #phoneNumber, #pageable}",

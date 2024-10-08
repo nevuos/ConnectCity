@@ -35,6 +35,7 @@ class UserAuthenticationService(
         userRepository.save(user)
     }
 
+    @Transactional(readOnly = true)
     fun findByEmail(email: String): User {
         return userRepository.findByEmail(email)
             ?: throw ResourceNotFoundError(UserMessages.USER_NOT_FOUND)
@@ -50,10 +51,12 @@ class UserAuthenticationService(
         userRepository.save(user)
     }
 
+    @Transactional(readOnly = true)
     fun isEmailConfirmed(userId: Long): Boolean {
         return findById(userId).emailConfirmed
     }
 
+    @Transactional(readOnly = true)
     fun verifyForResendConfirmation(email: String) {
         val user = userRepository.findByEmail(email)
         if (user == null || user.emailConfirmed) {
@@ -61,6 +64,7 @@ class UserAuthenticationService(
         }
     }
 
+    @Transactional(readOnly = true)
     internal fun findById(userId: Long): User {
         return userRepository.findById(userId).orElseThrow {
             ResourceNotFoundError(UserMessages.USER_NOT_FOUND)

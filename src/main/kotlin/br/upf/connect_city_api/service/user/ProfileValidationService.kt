@@ -6,6 +6,7 @@ import br.upf.connect_city_api.repository.MunicipalEmployeeRepository
 import br.upf.connect_city_api.util.constants.profile.ProfileMessages
 import br.upf.connect_city_api.util.exception.InvalidRequestError
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ProfileValidationService(
@@ -13,6 +14,7 @@ class ProfileValidationService(
     private val municipalEmployeeRepository: MunicipalEmployeeRepository
 ) {
 
+    @Transactional(readOnly = true)
     fun validateProfileData(cpf: String?, phoneNumber: String?, user: User, existingProfileId: Long? = null) {
         val validationErrors = mutableListOf<String>()
         cpf?.let {
@@ -33,6 +35,7 @@ class ProfileValidationService(
         }
     }
 
+    @Transactional(readOnly = true)
     private fun isCpfTaken(cpf: String, existingProfileId: Long?): Boolean {
         val citizen = citizenRepository.findByCpf(cpf)
         val employee = municipalEmployeeRepository.findByCpf(cpf)
@@ -41,6 +44,7 @@ class ProfileValidationService(
                 (employee != null && employee.id != existingProfileId)
     }
 
+    @Transactional(readOnly = true)
     private fun isPhoneNumberTaken(phoneNumber: String, existingProfileId: Long?): Boolean {
         val citizen = citizenRepository.findByPhoneNumber(phoneNumber)
         val employee = municipalEmployeeRepository.findByPhoneNumber(phoneNumber)
@@ -49,6 +53,7 @@ class ProfileValidationService(
                 (employee != null && employee.id != existingProfileId)
     }
 
+    @Transactional(readOnly = true)
     private fun isUserAssociated(user: User, existingProfileId: Long?): Boolean {
         val citizen = citizenRepository.findByUser(user)
         val employee = municipalEmployeeRepository.findByUser(user)
