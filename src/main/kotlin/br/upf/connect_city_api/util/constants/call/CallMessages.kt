@@ -26,7 +26,8 @@ object CallMessages {
 
     // Mensagens de Acesso
     const val ACCESS_DENIED = "Você não tem permissão para acessar este chamado."
-    const val CALL_ASSIGNMENT_FAILED = "Falha ao atribuir o chamado."
+    const val ONLY_MANAGER_CAN_ASSIGN =
+        "Somente gerentes podem fazer atribuições de chamados após a primeira atribuição."
 
     // Mensagens de Interações
     const val INTERACTION_ADDED_SUCCESSFULLY = "Interação adicionada com sucesso ao chamado."

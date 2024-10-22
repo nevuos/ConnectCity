@@ -31,8 +31,13 @@ class AttachmentService(
         attachments: List<MultipartFile>?,
         removeAttachmentIds: List<Long>? = null
     ) {
+        logger.info("Iniciando o processamento de anexos para o chamado com ID: $callId")
+
         val call = callRepository.findById(callId)
-            .orElseThrow { ResourceNotFoundError(AttachmentMessages.CALL_NOT_FOUND) }
+            .orElseThrow {
+                logger.error("Erro: Chamado não encontrado com ID: $callId")
+                ResourceNotFoundError(AttachmentMessages.CALL_NOT_FOUND)
+            }
 
         val entityAttachments = call.attachments.toMutableList()
 
@@ -45,8 +50,13 @@ class AttachmentService(
         attachments: List<MultipartFile>?,
         removeAttachmentIds: List<Long>? = null
     ) {
+        logger.info("Iniciando o processamento de anexos para o passo com ID: $stepId")
+
         val step = stepRepository.findById(stepId)
-            .orElseThrow { ResourceNotFoundError(AttachmentMessages.STEP_NOT_FOUND) }
+            .orElseThrow {
+                logger.error("Erro: Passo não encontrado com ID: $stepId")
+                ResourceNotFoundError(AttachmentMessages.STEP_NOT_FOUND)
+            }
 
         val entityAttachments = step.attachments.toMutableList()
 
@@ -60,27 +70,33 @@ class AttachmentService(
         call: Call?,
         step: Step?
     ) {
+        logger.info("Processando anexos. Quantidade de anexos para remover: ${removeAttachmentIds?.size ?: 0}")
         removeAttachments(entityAttachments, removeAttachmentIds)
+
         if (!attachments.isNullOrEmpty()) {
+            logger.info("Iniciando upload de anexos. Quantidade de arquivos para upload: ${attachments.size}")
             val uploadFutures = attachments.map { file ->
                 storageService.uploadFileAsync(file).thenApply { storedFilePath ->
                     val attachment = createAttachment(file, storedFilePath, call, step)
                     synchronized(entityAttachments) {
                         entityAttachments.add(attachment)
                     }
-                    logger.info("${AttachmentMessages.ATTACHMENT_UPLOAD_SUCCESS} - Arquivo: ${file.originalFilename}")
+                    logger.info(AttachmentMessages.ATTACHMENT_UPLOAD_SUCCESS.format(file.originalFilename))
                 }.exceptionally { ex ->
-                    logger.error("${AttachmentMessages.ATTACHMENT_UPLOAD_FAILED}: ${ex.message}")
+                    logger.error(AttachmentMessages.ATTACHMENT_UPLOAD_FAILED.format(ex.message))
                 }
             }
+
             CompletableFuture.allOf(*uploadFutures.toTypedArray()).whenComplete { _, ex ->
                 if (ex == null) {
                     attachmentRepository.saveAll(entityAttachments)
                     logger.info(AttachmentMessages.ATTACHMENT_PROCESS_COMPLETED)
                 } else {
-                    logger.error("${AttachmentMessages.ATTACHMENT_PROCESS_FAILED}: ${ex.message}")
+                    logger.error(AttachmentMessages.ATTACHMENT_PROCESS_FAILED.format(ex.message))
                 }
             }
+        } else {
+            logger.info("Nenhum arquivo para upload.")
         }
     }
 
@@ -88,37 +104,25 @@ class AttachmentService(
         removeAttachmentIds?.let { idsToRemove ->
             val attachmentsToRemove = entityAttachments.filter { it.id in idsToRemove }
             entityAttachments.removeAll(attachmentsToRemove)
+            logger.info("Iniciando remoção de anexos. Quantidade de anexos a remover: ${attachmentsToRemove.size}")
 
             attachmentsToRemove.forEach { attachment ->
-                storageService.deleteFile(attachment.fileUrl).exceptionally { ex ->
+                logger.info("Removendo anexo com ID: ${attachment.id} e URL: ${attachment.fileUrl}")
+
+                storageService.deleteFile(attachment.fileUrl).thenRun {
+                    attachmentRepository.delete(attachment)
+                    logger.info("${AttachmentMessages.ATTACHMENT_REMOVAL_SUCCESS} - ID: ${attachment.id}")
+                }.exceptionally { ex ->
                     logger.error("${AttachmentMessages.ATTACHMENT_REMOVAL_FAILED}: ${ex.message}")
                     null
                 }
-                attachmentRepository.delete(attachment)
             }
-            logger.info("${AttachmentMessages.ATTACHMENT_REMOVAL_SUCCESS} - IDs: $idsToRemove")
-        }
-    }
-
-    @Transactional
-    fun deleteAttachmentById(attachmentId: Long) {
-        val attachment = attachmentRepository.findById(attachmentId)
-            .orElseThrow {
-                logger.error(AttachmentMessages.ATTACHMENT_NOT_FOUND)
-                ResourceNotFoundError(AttachmentMessages.ATTACHMENT_NOT_FOUND)
-            }
-
-        storageService.deleteFile(attachment.fileUrl).exceptionally { ex ->
-            logger.error("${AttachmentMessages.ATTACHMENT_REMOVAL_FAILED}: ${ex.message}")
-            null
-        }
-
-        attachmentRepository.delete(attachment)
-        logger.info(AttachmentMessages.ATTACHMENT_REMOVAL_SUCCESS)
+        } ?: logger.info("Nenhum anexo marcado para remoção.")
     }
 
     @Transactional(readOnly = true)
     fun getAttachmentById(attachmentId: Long): Attachment {
+        logger.info("Buscando anexo com ID: $attachmentId")
         return attachmentRepository.findById(attachmentId)
             .orElseThrow {
                 logger.error(AttachmentMessages.ATTACHMENT_NOT_FOUND)
@@ -132,6 +136,7 @@ class AttachmentService(
         call: Call?,
         step: Step?
     ): Attachment {
+        logger.info("Criando novo anexo para o arquivo: ${file.originalFilename}, caminho salvo: $storedFilePath")
         return Attachment(
             call = call,
             step = step,

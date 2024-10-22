@@ -6,13 +6,14 @@ import br.upf.connect_city_api.model.entity.enums.CallStatus
 import br.upf.connect_city_api.model.entity.enums.PriorityLevel
 import br.upf.connect_city_api.model.entity.enums.UserType
 import br.upf.connect_city_api.service.call.CallService
-import br.upf.connect_city_api.service.call.CategoryService
-import br.upf.connect_city_api.service.call.InteractionService
-import br.upf.connect_city_api.service.call.StepService
+import br.upf.connect_city_api.service.call.category.CategoryService
+import br.upf.connect_city_api.service.call.interaction.InteractionService
+import br.upf.connect_city_api.service.call.step.StepService
 import br.upf.connect_city_api.util.security.UserTypeRequired
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
-import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -58,24 +59,44 @@ class CallController(
         return ResponseEntity.ok(ApiResponseDTO(message))
     }
 
-    @UserTypeRequired(UserType.CITIZEN, UserType.MUNICIPAL_EMPLOYEE)
-    @PatchMapping("/{callId}/update")
-    fun updateCallByCreator(
+    @UserTypeRequired(UserType.CITIZEN)
+    @PatchMapping("/{callId}/update/citizen")
+    fun updateCallByCitizenCreator(
         @PathVariable callId: Long,
-        @RequestPart("updateData") @Valid updateRequest: CreatorUpdateCallRequestDTO,
+        @RequestPart("updateData") @Valid updateRequest: UpdateCallByCitizenCreatorRequestDTO,
         @RequestPart("attachments", required = false) attachments: List<MultipartFile>?,
         @RequestParam("removeAttachmentIds", required = false) removeAttachmentIds: List<Long>?,
         request: HttpServletRequest
     ): ResponseEntity<ApiResponseDTO> {
-        val message = callService.updateByCreator(request, callId, updateRequest, attachments, removeAttachmentIds)
+        val message =
+            callService.updateByCitizenCreator(request, callId, updateRequest, attachments, removeAttachmentIds)
         return ResponseEntity.ok(ApiResponseDTO(message))
     }
 
     @UserTypeRequired(UserType.MUNICIPAL_EMPLOYEE)
-    @PatchMapping("/{callId}/manage")
+    @PatchMapping("/{callId}/update/municipal-employee")
+    fun updateCallByMunicipalEmployeeCreator(
+        @PathVariable callId: Long,
+        @RequestPart("updateData") @Valid updateRequest: UpdateCallByMunicipalEmployeeCreatorRequestDTO,
+        @RequestPart("attachments", required = false) attachments: List<MultipartFile>?,
+        @RequestParam("removeAttachmentIds", required = false) removeAttachmentIds: List<Long>?,
+        request: HttpServletRequest
+    ): ResponseEntity<ApiResponseDTO> {
+        val message = callService.updateByMunicipalEmployeeCreator(
+            request,
+            callId,
+            updateRequest,
+            attachments,
+            removeAttachmentIds
+        )
+        return ResponseEntity.ok(ApiResponseDTO(message))
+    }
+
+    @UserTypeRequired(UserType.MUNICIPAL_EMPLOYEE)
+    @PatchMapping("/{callId}/update/manager")
     fun updateCallByManager(
         @PathVariable callId: Long,
-        @RequestPart("updateData") @Valid updateRequest: ManagerUpdateCallRequestDTO,
+        @RequestPart("updateData") @Valid updateRequest: UpdateCallByManagerRequestDTO,
         @RequestPart("attachments", required = false) attachments: List<MultipartFile>?,
         @RequestParam("removeAttachmentIds", required = false) removeAttachmentIds: List<Long>?,
         request: HttpServletRequest
@@ -152,14 +173,15 @@ class CallController(
         @RequestParam(required = false) citizenName: String?,
         @RequestParam(required = false) employeeName: String?,
         @RequestParam(required = false) categoryIds: List<Long>?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) createdAtStart: LocalDateTime?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) createdAtEnd: LocalDateTime?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) closedAtStart: LocalDateTime?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) closedAtEnd: LocalDateTime?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) estimatedCompletionStart: LocalDateTime?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) estimatedCompletionEnd: LocalDateTime?
-    ): ResponseEntity<List<CallDetailsDTO>> {
-        val callDetailsDTOs = callService.search(
+        @RequestParam(required = false) createdAtStart: LocalDateTime?,
+        @RequestParam(required = false) createdAtEnd: LocalDateTime?,
+        @RequestParam(required = false) closedAtStart: LocalDateTime?,
+        @RequestParam(required = false) closedAtEnd: LocalDateTime?,
+        @RequestParam(required = false) estimatedCompletionStart: LocalDateTime?,
+        @RequestParam(required = false) estimatedCompletionEnd: LocalDateTime?,
+        pageable: Pageable
+    ): ResponseEntity<Page<CallDetailsDTO>> {
+        val callDetailsPage = callService.search(
             subject,
             description,
             statuses,
@@ -172,8 +194,9 @@ class CallController(
             closedAtStart,
             closedAtEnd,
             estimatedCompletionStart,
-            estimatedCompletionEnd
+            estimatedCompletionEnd,
+            pageable
         )
-        return ResponseEntity.ok(callDetailsDTOs)
+        return ResponseEntity.ok(callDetailsPage)
     }
 }

@@ -29,10 +29,14 @@ class FailedNotificationRescheduler(
                     val recipientEmail = getCreatorEmail(notification.call)
 
                     recipientEmail?.let {
+                        val customMessage = NotificationMessages.FAILED_NOTIFICATION_MESSAGE.replace(
+                            "{CALL_ID}", notification.call.id.toString()
+                        )
                         notificationService.sendNotification(
                             notification.call,
                             notification.notificationType,
-                            recipientEmail
+                            recipientEmail,
+                            customMessage
                         )
                     }
 

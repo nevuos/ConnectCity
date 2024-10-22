@@ -58,6 +58,16 @@ class MunicipalEmployeeController(
     }
 
     @UserTypeRequired(UserType.ADMIN)
+    @PatchMapping("/{employeeId}/manager-status")
+    fun updateManagerStatus(
+        @PathVariable employeeId: Long,
+        @RequestParam isManager: Boolean
+    ): ResponseEntity<ApiResponseDTO> {
+        val message = municipalEmployeeService.updateManagerStatus(employeeId, isManager)
+        return ResponseEntity.ok(ApiResponseDTO(message))
+    }
+
+    @UserTypeRequired(UserType.ADMIN)
     @GetMapping("/search")
     fun search(
         @RequestParam(required = false) firstName: String?,

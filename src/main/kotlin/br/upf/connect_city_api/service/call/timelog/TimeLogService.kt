@@ -1,4 +1,4 @@
-package br.upf.connect_city_api.service.call
+package br.upf.connect_city_api.service.call.timelog
 
 import br.upf.connect_city_api.model.entity.call.Call
 import br.upf.connect_city_api.model.entity.call.Step

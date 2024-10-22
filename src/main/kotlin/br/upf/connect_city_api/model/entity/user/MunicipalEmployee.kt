@@ -53,5 +53,8 @@ class MunicipalEmployee(
     var approvingAdmin: Admin? = null,
 
     @OneToMany(mappedBy = "employee", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var timeLogs: MutableList<TimeLog> = mutableListOf()
+    var timeLogs: MutableList<TimeLog> = mutableListOf(),
+
+    @Column(nullable = false)
+    var isManager: Boolean = false
 )

@@ -134,6 +134,21 @@ class MunicipalEmployeeService(
         return MunicipalEmployeeMessages.EMPLOYEE_APPROVED_SUCCESSFULLY
     }
 
+    @Transactional
+    fun updateManagerStatus(employeeId: Long, isManager: Boolean): String {
+        val employee = municipalEmployeeRepository.findById(employeeId)
+            .orElseThrow { ResourceNotFoundError(MunicipalEmployeeMessages.EMPLOYEE_NOT_FOUND) }
+
+        employee.isManager = isManager
+        municipalEmployeeRepository.save(employee)
+
+        return if (isManager) {
+            MunicipalEmployeeMessages.MANAGER_APPROVED_SUCCESSFULLY
+        } else {
+            MunicipalEmployeeMessages.MANAGER_REMOVED_SUCCESSFULLY
+        }
+    }
+
     @Transactional(readOnly = true)
     @Cacheable(
         value = ["searchMunicipalEmployees"],

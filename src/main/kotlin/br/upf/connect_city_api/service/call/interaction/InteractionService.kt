@@ -1,4 +1,4 @@
-package br.upf.connect_city_api.service.call
+package br.upf.connect_city_api.service.call.interaction
 
 import br.upf.connect_city_api.model.entity.call.Interaction
 import br.upf.connect_city_api.repository.CallRepository

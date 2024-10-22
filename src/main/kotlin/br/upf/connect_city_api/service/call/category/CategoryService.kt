@@ -1,4 +1,4 @@
-package br.upf.connect_city_api.service.call
+package br.upf.connect_city_api.service.call.category
 
 import br.upf.connect_city_api.dtos.call.CreateCategoryRequestDTO
 import br.upf.connect_city_api.model.entity.call.Category
@@ -6,9 +6,9 @@ import br.upf.connect_city_api.repository.CategoryRepository
 import br.upf.connect_city_api.util.constants.call.CallMessages
 import br.upf.connect_city_api.util.exception.InvalidRequestError
 import br.upf.connect_city_api.util.exception.ResourceNotFoundError
-import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CategoryService(
