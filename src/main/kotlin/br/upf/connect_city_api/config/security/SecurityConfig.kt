@@ -36,6 +36,7 @@ class SecurityConfig(
             "$apiPrefix/v3/api-docs/**",
             "$apiPrefix/auth/register",
             "$apiPrefix/auth/login",
+            "$apiPrefix/auth/logout",
             "$apiPrefix/auth/confirm-email/**",
             "$apiPrefix/auth/resend-confirmation",
             "$apiPrefix/auth/request-password-reset",

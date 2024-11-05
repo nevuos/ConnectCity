@@ -56,15 +56,17 @@ class AuthService(
     }
 
     fun resetPassword(token: String, newPassword: String): String {
+        if (!tokenService.validateToken(token)) {
+            throw AuthenticationError(AuthMessages.TOKEN_INVALID_OR_EXPIRED)
+        }
         val email = tokenService.getEmailFromToken(token)
             ?: throw AuthenticationError(AuthMessages.TOKEN_INVALID_OR_EXPIRED)
-
         val user = userAuthenticationService.findByEmail(email)
         userAuthenticationService.updatePassword(user.id, newPassword)
-
         accountLockoutService.resetPasswordResetAttempts(email)
         return AuthMessages.PASSWORD_CHANGED_SUCCESS
     }
+
 
     fun validateToken(token: String?): String {
         if (!tokenService.isValidToken(token)) {
