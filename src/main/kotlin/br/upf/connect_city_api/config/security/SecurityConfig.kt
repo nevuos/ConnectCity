@@ -41,12 +41,6 @@ class SecurityConfig(
             "$apiPrefix/auth/resend-confirmation",
             "$apiPrefix/auth/request-password-reset",
             "$apiPrefix/auth/reset-password",
-            "$apiPrefix/auth/renew-token",
-            "$apiPrefix/employees/**",
-            "$apiPrefix/users/**",
-            "$apiPrefix/citizens/**",
-            "$apiPrefix/categories/**",
-            "$apiPrefix/calls/**",
         )
     }
 
