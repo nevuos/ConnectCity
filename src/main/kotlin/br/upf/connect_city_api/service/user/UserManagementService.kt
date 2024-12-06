@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
@@ -100,7 +101,7 @@ class UserManagementService(
         isActive: Boolean?,
         createdAfter: LocalDateTime?,
         createdBefore: LocalDateTime?,
-        createdOn: LocalDateTime?,
+        createdOn: LocalDate?,
         pageable: Pageable
     ): Page<UserDetailsDTO> {
         val spec = createUserSpecification(username, email, userType, isActive, createdAfter, createdBefore, createdOn)
@@ -186,10 +187,10 @@ class UserManagementService(
         isActive: Boolean?,
         createdAfter: LocalDateTime?,
         createdBefore: LocalDateTime?,
-        createdOn: LocalDateTime?
+        createdOn: LocalDate?
     ): Specification<User> {
         val userTypeEnum = try {
-            userType?.let { UserType.valueOf(it.uppercase()) }
+            userType?.trim()?.uppercase()?.let { UserType.valueOf(it) }
         } catch (e: IllegalArgumentException) {
             throw InvalidRequestError(String.format(UserMessages.INVALID_USER_TYPE, userType))
         }

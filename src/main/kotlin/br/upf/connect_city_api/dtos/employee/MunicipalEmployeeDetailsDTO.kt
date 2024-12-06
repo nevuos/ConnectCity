@@ -1,6 +1,7 @@
 package br.upf.connect_city_api.dtos.employee
 
 import br.upf.connect_city_api.model.entity.enums.EmployeeType
+import java.time.LocalDate
 
 data class MunicipalEmployeeDetailsDTO(
     val id: Long? = null,
@@ -11,5 +12,8 @@ data class MunicipalEmployeeDetailsDTO(
     val jobTitle: String? = null,
     val department: String? = null,
     val employeeType: EmployeeType? = null,
-    val isApproved: Boolean? = null
+    val isApproved: Boolean? = null,
+    val dateOfBirth: LocalDate? = null,
+    val gender: String? = null,
+    val isManager: Boolean? = null
 )

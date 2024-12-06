@@ -25,7 +25,6 @@ class CallController(
     private val callService: CallService,
     private val stepService: StepService,
     private val interactionService: InteractionService,
-    private val categoryService: CategoryService
 ) {
 
     @UserTypeRequired(UserType.CITIZEN)
@@ -47,15 +46,6 @@ class CallController(
         request: HttpServletRequest
     ): ResponseEntity<ApiResponseDTO> {
         val message = callService.createCallForMunicipalEmployee(request, createRequest, attachments)
-        return ResponseEntity.ok(ApiResponseDTO(message))
-    }
-
-    @UserTypeRequired(UserType.ADMIN)
-    @PostMapping("/categories")
-    fun createCategory(
-        @RequestBody @Valid createRequest: CreateCategoryRequestDTO
-    ): ResponseEntity<ApiResponseDTO> {
-        val message = categoryService.createCategory(createRequest)
         return ResponseEntity.ok(ApiResponseDTO(message))
     }
 
@@ -163,15 +153,27 @@ class CallController(
     }
 
     @UserTypeRequired(UserType.CITIZEN, UserType.MUNICIPAL_EMPLOYEE, UserType.ADMIN)
+    @GetMapping("/{callId}")
+    fun getCallDetailsById(
+        @PathVariable callId: Long,
+        request: HttpServletRequest
+    ): ResponseEntity<CallDetailsDTO> {
+        val callDetails = callService.getCallDetailsById(callId)
+        return ResponseEntity.ok(callDetails)
+    }
+
+    @UserTypeRequired(UserType.CITIZEN, UserType.MUNICIPAL_EMPLOYEE, UserType.ADMIN)
     @GetMapping("/search")
     fun search(
         request: HttpServletRequest,
         @RequestParam(required = false) subject: String?,
         @RequestParam(required = false) description: String?,
-        @RequestParam(required = false) statuses: List<CallStatus>?,
-        @RequestParam(required = false) priorities: List<PriorityLevel>?,
+        @RequestParam(required = false) status: List<CallStatus>?,
+        @RequestParam(required = false) priority: List<PriorityLevel>?,
         @RequestParam(required = false) citizenName: String?,
         @RequestParam(required = false) employeeName: String?,
+        @RequestParam(required = false) createdBy: String?,
+        @RequestParam(required = false) isPublic: Boolean?,
         @RequestParam(required = false) categoryIds: List<Long>?,
         @RequestParam(required = false) createdAtStart: LocalDateTime?,
         @RequestParam(required = false) createdAtEnd: LocalDateTime?,
@@ -179,15 +181,19 @@ class CallController(
         @RequestParam(required = false) closedAtEnd: LocalDateTime?,
         @RequestParam(required = false) estimatedCompletionStart: LocalDateTime?,
         @RequestParam(required = false) estimatedCompletionEnd: LocalDateTime?,
+        @RequestParam(required = false) citizenId: Long?,
+        @RequestParam(required = false) employeeId: Long?,
         pageable: Pageable
     ): ResponseEntity<Page<CallDetailsDTO>> {
         val callDetailsPage = callService.search(
             subject,
             description,
-            statuses,
-            priorities,
+            status,
+            priority,
             citizenName,
             employeeName,
+            createdBy,
+            isPublic,
             categoryIds,
             createdAtStart,
             createdAtEnd,
@@ -195,6 +201,8 @@ class CallController(
             closedAtEnd,
             estimatedCompletionStart,
             estimatedCompletionEnd,
+            citizenId,
+            employeeId,
             pageable
         )
         return ResponseEntity.ok(callDetailsPage)

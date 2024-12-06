@@ -50,12 +50,14 @@ class ManagerUpdateStrategy(
     }
 
     private fun handleStatusChange(call: Call, newStatus: CallStatus, user: User) {
+        val previousStatus = call.status
         call.status = newStatus
         call.updatedAt = LocalDateTime.now()
         call.updatedBy = getFullNameOrUsername(call.assignedTo?.firstName, call.assignedTo?.lastName, user.username)
 
         val statusChange = StatusChange(
             status = newStatus,
+            previousStatus = previousStatus,
             changedAt = LocalDateTime.now(),
             changedBy = user.username,
             call = call

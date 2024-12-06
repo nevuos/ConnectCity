@@ -4,6 +4,8 @@ import br.upf.connect_city_api.model.entity.call.Call
 import br.upf.connect_city_api.model.entity.call.Category
 import br.upf.connect_city_api.model.entity.enums.CallStatus
 import br.upf.connect_city_api.model.entity.enums.PriorityLevel
+import br.upf.connect_city_api.model.entity.user.Citizen
+import br.upf.connect_city_api.model.entity.user.MunicipalEmployee
 import jakarta.persistence.criteria.JoinType
 import org.springframework.data.jpa.domain.Specification
 import java.time.LocalDateTime
@@ -18,6 +20,32 @@ object CallSpecifications {
                     "%${searchTerm.lowercase()}%"
                 )
             }
+        }
+    }
+
+    fun hasCitizenId(citizenId: Long): Specification<Call> {
+        return Specification { root, _, cb ->
+            cb.equal(root.get<Citizen>("citizen").get<Long>("id"), citizenId)
+        }
+    }
+
+    fun hasEmployeeId(employeeId: Long): Specification<Call> {
+        return Specification { root, _, cb ->
+            cb.equal(root.get<MunicipalEmployee>("employee").get<Long>("id"), employeeId)
+        }
+    }
+
+    fun hasIsPublic(isPublic: Boolean?): Specification<Call>? {
+        return isPublic?.let { publicFlag ->
+            Specification { root, _, cb ->
+                cb.equal(root.get<Boolean>("isPublic"), publicFlag)
+            }
+        }
+    }
+
+    fun hasCreatedBy(createdBy: String): Specification<Call> {
+        return Specification { root, _, criteriaBuilder ->
+            criteriaBuilder.equal(root.get<String>("createdBy"), createdBy)
         }
     }
 
@@ -66,7 +94,7 @@ object CallSpecifications {
         }
     }
 
-    fun hasStatuses(statuses: List<CallStatus>?): Specification<Call>? {
+    fun hasStatus(statuses: List<CallStatus>?): Specification<Call>? {
         return statuses?.takeIf { it.isNotEmpty() }?.let {
             Specification { root, _, _ ->
                 root.get<CallStatus>("status").`in`(it)
@@ -74,7 +102,7 @@ object CallSpecifications {
         }
     }
 
-    fun hasPriorities(priorities: List<PriorityLevel>?): Specification<Call>? {
+    fun hasPriority(priorities: List<PriorityLevel>?): Specification<Call>? {
         return priorities?.takeIf { it.isNotEmpty() }?.let {
             Specification { root, _, _ ->
                 root.get<PriorityLevel>("priority").`in`(it)

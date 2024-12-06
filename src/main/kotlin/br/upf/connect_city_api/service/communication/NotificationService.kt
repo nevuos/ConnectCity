@@ -2,7 +2,6 @@ package br.upf.connect_city_api.service.communication
 
 import br.upf.connect_city_api.model.entity.call.Call
 import br.upf.connect_city_api.model.entity.call.Notification
-import br.upf.connect_city_api.model.entity.enums.CallStatus
 import br.upf.connect_city_api.repository.CallRepository
 import br.upf.connect_city_api.repository.NotificationRepository
 import br.upf.connect_city_api.util.constants.notification.NotificationMessages
@@ -36,6 +35,8 @@ class NotificationService(
                 val dynamicData = createEmailDynamicData(call, customMessage)
                 sendEmailIfRequired(recipientEmail, dynamicData)
                 updateNotificationStatus(notification, NotificationMessages.NOTIFICATION_STATUS_SENT)
+                notification.message = customMessage
+                notification.recipient = recipientEmail
                 updateLastNotifiedAt(call)
             } catch (e: Exception) {
                 handleNotificationFailure(notification)
@@ -82,12 +83,14 @@ class NotificationService(
     }
 
     private fun createNotification(call: Call, notificationType: String, status: String): Notification {
+        val message = NotificationMessages.CALL_CREATED_MESSAGE_CITIZEN.replace("{CALL_ID}", call.id.toString())
         return Notification(
             notificationType = notificationType,
             call = call,
             sentAt = LocalDateTime.now(),
             status = status,
-            attemptCount = 0
+            message = message,
+            recipient = call.citizen?.user?.email ?: call.employee?.user?.email
         )
     }
 

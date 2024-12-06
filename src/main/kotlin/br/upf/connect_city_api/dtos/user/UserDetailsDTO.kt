@@ -8,5 +8,6 @@ data class UserDetailsDTO(
     val username: String? = null,
     val email: String? = null,
     val userType: UserType? = null,
-    val createdAt: LocalDateTime? = null
+    val createdAt: LocalDateTime? = null,
+    val isActive: Boolean? = null
 )

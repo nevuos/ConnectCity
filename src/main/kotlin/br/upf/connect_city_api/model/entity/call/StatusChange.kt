@@ -16,6 +16,10 @@ class StatusChange(
     var status: CallStatus,
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    val previousStatus: CallStatus?,
+
+    @Column(nullable = false)
     var changedAt: LocalDateTime = LocalDateTime.now(),
 
     @Column(nullable = false)

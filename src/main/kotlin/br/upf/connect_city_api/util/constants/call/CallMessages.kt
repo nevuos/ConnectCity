@@ -12,17 +12,10 @@ object CallMessages {
     // Mensagens de Erro
     const val CALL_NOT_FOUND = "Chamado não encontrado."
     const val STEP_NOT_FOUND = "Etapa não encontrada."
-    const val CATEGORY_NOT_FOUND = "Categoria não encontrada com o ID fornecido."
     const val CALL_ID_CANNOT_BE_NULL = "ID do chamado não pode ser nulo."
     const val INVALID_STATUS_UPDATE = "Status de chamado inválido."
-    const val CATEGORY_ALREADY_EXISTS = "A categoria já existe."
     const val INVALID_CATEGORY = "Categoria inválida fornecida."
     const val CALL_CREATION_FAILED = "Falha ao criar o chamado."
-
-    // Mensagens de Categorias
-    const val CATEGORY_CREATED_SUCCESS = "Categoria criada com sucesso."
-    const val CATEGORY_UPDATED_SUCCESS = "Categoria atualizada com sucesso."
-    const val CATEGORY_DELETED_SUCCESS = "Categoria excluída com sucesso."
 
     // Mensagens de Acesso
     const val ACCESS_DENIED = "Você não tem permissão para acessar este chamado."

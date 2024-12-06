@@ -4,6 +4,7 @@ import br.upf.connect_city_api.dtos.api.ApiResponseDTO
 import br.upf.connect_city_api.dtos.employee.CreateMunicipalEmployeeRequestDTO
 import br.upf.connect_city_api.dtos.employee.MunicipalEmployeeDetailsDTO
 import br.upf.connect_city_api.dtos.employee.UpdateMunicipalEmployeeRequestDTO
+import br.upf.connect_city_api.model.entity.enums.EmployeeType
 import br.upf.connect_city_api.model.entity.enums.UserType
 import br.upf.connect_city_api.service.user.MunicipalEmployeeService
 import br.upf.connect_city_api.util.security.UserTypeRequired
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/employees")
@@ -67,7 +69,16 @@ class MunicipalEmployeeController(
         return ResponseEntity.ok(ApiResponseDTO(message))
     }
 
-    @UserTypeRequired(UserType.ADMIN)
+    @UserTypeRequired(UserType.ADMIN, UserType.MUNICIPAL_EMPLOYEE)
+    @GetMapping("/search/{id}")
+    fun getById(
+        @PathVariable id: Long
+    ): ResponseEntity<MunicipalEmployeeDetailsDTO> {
+        val employeeDetails = municipalEmployeeService.getById(id)
+        return ResponseEntity.ok(employeeDetails)
+    }
+
+    @UserTypeRequired(UserType.ADMIN, UserType.MUNICIPAL_EMPLOYEE)
     @GetMapping("/search")
     fun search(
         @RequestParam(required = false) firstName: String?,
@@ -75,10 +86,17 @@ class MunicipalEmployeeController(
         @RequestParam(required = false) cpf: String?,
         @RequestParam(required = false) jobTitle: String?,
         @RequestParam(required = false) department: String?,
+        @RequestParam(required = false) isApproved: Boolean?,
+        @RequestParam(required = false) isManager: Boolean?,
+        @RequestParam(required = false) dateOfBirth: LocalDate?,
+        @RequestParam(required = false) gender: String?,
+        @RequestParam(required = false) phoneNumber: String?,
+        @RequestParam(required = false) employeeType: EmployeeType?,
         pageable: Pageable
     ): ResponseEntity<Page<MunicipalEmployeeDetailsDTO>> {
-        val employeeDetailsPage =
-            municipalEmployeeService.search(firstName, lastName, cpf, jobTitle, department, pageable)
+        val employeeDetailsPage = municipalEmployeeService.search(
+            firstName, lastName, cpf, jobTitle, department, isApproved, isManager, dateOfBirth, gender, phoneNumber, employeeType, pageable
+        )
         return ResponseEntity.ok(employeeDetailsPage)
     }
 }

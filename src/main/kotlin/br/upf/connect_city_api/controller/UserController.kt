@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @RestController
@@ -62,7 +63,7 @@ class UserController(
         @RequestParam(required = false) isActive: Boolean?,
         @RequestParam(required = false) createdAfter: LocalDateTime?,
         @RequestParam(required = false) createdBefore: LocalDateTime?,
-        @RequestParam(required = false) createdOn: LocalDateTime?,
+        @RequestParam(required = false) createdOn: LocalDate?,
         pageable: Pageable
     ): ResponseEntity<Page<UserDetailsDTO>> {
         val userDetailsPage =

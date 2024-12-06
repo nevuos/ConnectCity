@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class MunicipalEmployeeService(
@@ -150,17 +151,25 @@ class MunicipalEmployeeService(
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(
-        value = ["searchMunicipalEmployees"],
-        key = "{#firstName, #lastName, #cpf, #jobTitle, #department, #pageable}",
-        cacheManager = "searchCacheManager"
-    )
+    fun getById(id: Long): MunicipalEmployeeDetailsDTO {
+        val municipalEmployee = municipalEmployeeRepository.findById(id)
+            .orElseThrow { ResourceNotFoundError(MunicipalEmployeeMessages.EMPLOYEE_NOT_FOUND) }
+
+        return modelMapper.map(municipalEmployee, MunicipalEmployeeDetailsDTO::class.java)
+    }
+
     fun search(
         firstName: String? = null,
         lastName: String? = null,
         cpf: String? = null,
         jobTitle: String? = null,
         department: String? = null,
+        isApproved: Boolean? = null,
+        isManager: Boolean? = null,
+        dateOfBirth: LocalDate? = null,
+        gender: String? = null,
+        phoneNumber: String? = null,
+        employeeType: EmployeeType? = null,
         pageable: Pageable
     ): Page<MunicipalEmployeeDetailsDTO> {
         val spec = Specification.where(MunicipalEmployeeSpecifications.firstNameContains(firstName))
@@ -168,6 +177,12 @@ class MunicipalEmployeeService(
             .and(MunicipalEmployeeSpecifications.cpfEquals(cpf))
             .and(MunicipalEmployeeSpecifications.jobTitleContains(jobTitle))
             .and(MunicipalEmployeeSpecifications.departmentContains(department))
+            .and(MunicipalEmployeeSpecifications.isApprovedEquals(isApproved))
+            .and(MunicipalEmployeeSpecifications.isManagerEquals(isManager))
+            .and(MunicipalEmployeeSpecifications.dateOfBirthEquals(dateOfBirth))
+            .and(MunicipalEmployeeSpecifications.genderEquals(gender))
+            .and(MunicipalEmployeeSpecifications.phoneNumberEquals(phoneNumber))
+            .and(MunicipalEmployeeSpecifications.employeeTypeEquals(employeeType))
 
         val employees = municipalEmployeeRepository.findAll(spec, pageable)
         return employees.map { employee -> modelMapper.map(employee, MunicipalEmployeeDetailsDTO::class.java) }

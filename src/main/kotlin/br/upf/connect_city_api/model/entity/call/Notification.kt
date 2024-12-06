@@ -23,5 +23,11 @@ class Notification(
     @JoinColumn(name = "call_id", nullable = false)
     var call: Call,
 
+    @Column(nullable = true, length = 2000)
+    var message: String? = null,
+
+    @Column(nullable = true)
+    var recipient: String? = null,
+
     var attemptCount: Int = 0
 )

@@ -5,10 +5,10 @@ import br.upf.connect_city_api.model.entity.enums.PriorityLevel
 import java.time.LocalDateTime
 
 data class CallDTO(
-    val id: Long?,
-    val subject: String,
-    val status: CallStatus,
-    val priority: PriorityLevel,
-    val createdAt: LocalDateTime,
-    val estimatedCompletion: LocalDateTime?
+    val id: Long? = null,
+    val subject: String? = null,
+    val status: CallStatus? = null,
+    val priority: PriorityLevel? = null,
+    val createdAt: LocalDateTime? = null,
+    val estimatedCompletion: LocalDateTime? = null
 )

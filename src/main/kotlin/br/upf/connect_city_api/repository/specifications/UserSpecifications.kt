@@ -3,6 +3,7 @@ package br.upf.connect_city_api.repository.specifications
 import br.upf.connect_city_api.model.entity.enums.UserType
 import br.upf.connect_city_api.model.entity.user.User
 import org.springframework.data.jpa.domain.Specification
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -44,14 +45,13 @@ object UserSpecifications {
         }
     }
 
-    fun createdOn(createdOn: LocalDateTime?): Specification<User>? {
+    fun createdOn(createdOn: LocalDate?): Specification<User>? {
         return createdOn?.let {
             Specification { root, _, cb ->
                 val createdDate = cb.function("DATE", java.sql.Date::class.java, root.get<Date>("createdAt"))
-                val targetDate = java.sql.Date.valueOf(it.toLocalDate())
+                val targetDate = java.sql.Date.valueOf(it)
                 cb.equal(createdDate, targetDate)
             }
         }
     }
-
 }
